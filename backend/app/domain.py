@@ -1,4 +1,8 @@
-"""熬锅出胶门槛：最近一次煮胶峰值温度须 ≥ 90℃。"""
+"""熬锅门槛。
+
+- 出胶：最近一次煮胶峰值温度须 ≥ 90℃，与封灶旗无关。
+- 登记峰值：坊上封灶旗升起时禁止入库；改锅态不受封灶影响。
+"""
 
 from app.models import Kettle
 
@@ -14,6 +18,11 @@ def latest_peak(kettle: Kettle) -> float | None:
         return None
     latest = max(kettle.cooks, key=lambda c: c.taken_at)
     return latest.peak_temp_c
+
+
+def assert_can_log_peak(seal_raised: bool) -> None:
+    if seal_raised:
+        raise RuleError("本坊封灶旗已升起，封灶期间不得登记峰值")
 
 
 def assert_can_set_status(kettle: Kettle, new_status: str) -> None:

@@ -22,6 +22,7 @@ class Workshop(SQLModel, table=True):
     name: str
     alley: str = ""
     kettles: list["Kettle"] = Relationship(back_populates="workshop")
+    seal: Optional["StoveSeal"] = Relationship(back_populates="workshop")
 
 
 class Kettle(SQLModel, table=True):
@@ -45,3 +46,29 @@ class CookLog(SQLModel, table=True):
     peak_temp_c: float
     operator: str = ""
     kettle: Optional[Kettle] = Relationship(back_populates="cooks")
+
+
+class StoveSeal(SQLModel, table=True):
+    """每坊现行封灶记录，全表每坊至多一条（workshop_id 唯一）。"""
+
+    __tablename__ = "stoveseal"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    workshop_id: int = Field(foreign_key="workshop.id", unique=True, index=True)
+    raised: bool = False
+    changed_by: str = ""
+    changed_at: datetime = Field(default_factory=utcnow)
+    workshop: Optional[Workshop] = Relationship(back_populates="seal")
+
+
+class StoveSealLog(SQLModel, table=True):
+    """封灶升旗/降旗流水，只追加，不改写。"""
+
+    __tablename__ = "stoveseallog"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    workshop_id: int = Field(foreign_key="workshop.id", index=True)
+    workshop_name: str = ""
+    raised: bool = False
+    changed_by: str = ""
+    changed_at: datetime = Field(default_factory=utcnow)
