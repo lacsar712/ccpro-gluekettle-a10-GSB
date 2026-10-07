@@ -45,3 +45,15 @@ class CookLog(SQLModel, table=True):
     peak_temp_c: float
     operator: str = ""
     kettle: Optional[Kettle] = Relationship(back_populates="cooks")
+
+
+class SealFlag(SQLModel, table=True):
+    """封灶旗：每坊最多一条现行记录（workshop_id 唯一）。"""
+
+    __tablename__ = "seal_flags"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    workshop_id: int = Field(foreign_key="workshop.id", unique=True, index=True)
+    raised: bool = False
+    changed_by: str = ""
+    changed_at: datetime = Field(default_factory=utcnow)

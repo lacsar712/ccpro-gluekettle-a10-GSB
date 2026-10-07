@@ -1,7 +1,7 @@
 from sqlmodel import select
 
 from app.db import get_session
-from app.models import CookLog, Kettle, User, Workshop
+from app.models import CookLog, Kettle, SealFlag, User, Workshop
 from app.security import hash_password
 
 
@@ -25,6 +25,10 @@ def seed_demo() -> None:
         shop = Workshop(name="骨巷熬胶坊", alley="西市骨巷")
         session.add(shop)
         session.flush()
+        # 一坊封灶旗种子即升起：验收「升起则登峰值被中文挡住」。
+        session.add(SealFlag(workshop_id=shop.id, raised=True, changed_by="admin"))
+        # 二坊不建旗：供封灶台按坊筛列表，且验证「未建旗不拦」。
+        session.add(Workshop(name="东市熬胶坊", alley="东市骡马巷"))
         layout = [
             ("锅-1", Kettle.STATUS_BOILING, 0, 96.0),
             ("锅-2", Kettle.STATUS_COLD, 1, None),

@@ -1,6 +1,8 @@
-"""熬锅出胶门槛：最近一次煮胶峰值温度须 ≥ 90℃。"""
+"""熬锅出胶门槛：最近一次煮胶峰值温度须 ≥ 90℃；封灶旗升起时该坊停登峰值。"""
 
-from app.models import Kettle
+from typing import Optional
+
+from app.models import Kettle, SealFlag
 
 MIN_PEAK = 90.0
 
@@ -14,6 +16,12 @@ def latest_peak(kettle: Kettle) -> float | None:
         return None
     latest = max(kettle.cooks, key=lambda c: c.taken_at)
     return latest.peak_temp_c
+
+
+def assert_can_log_peak(seal: Optional[SealFlag]) -> None:
+    """登记峰值门槛：该坊封灶旗升起则挡；降下或未建旗不拦。"""
+    if seal is not None and seal.raised:
+        raise RuleError("封灶旗已升起，该坊暂停登记峰值")
 
 
 def assert_can_set_status(kettle: Kettle, new_status: str) -> None:
